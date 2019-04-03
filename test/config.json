@@ -1,0 +1,1 @@
+{"rules": [{"filters": [{"type": "escalators"}], "backward_speed": 0, "backward_zspeed": 0}, {"speed": 1, "zspeed": 1, "filters": [{"type": "elevator"}], "backward_speed": 1, "backward_zspeed": 1}, {"speed": 0, "zspeed": 0, "filters": [{"type": "escalators"}], "profiles": ["pmr"], "backward_speed": 0, "backward_zspeed": 0}], "zsensitivity": 1000000, "tesselationdistance": 5}
