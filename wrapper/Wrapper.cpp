@@ -145,7 +145,7 @@ namespace carto { namespace sgre {
     std::ostream& operator << (std::ostream& os, const RouteFinder& routeFinder) {
         os << "RouteFinder(";
         const RouteFinder::RouteOptions& routeOptions = routeFinder.getRouteOptions();
-        os << "pathstraightening=" << routeOptions.pathStraightening << ",tesselationdistance=" << routeOptions.tesselationDistance << ",zsensitivity=" << routeOptions.zSensitivity << ",min_turnangle=" << routeOptions.minTurnAngle << ",min_updownangle=" << routeOptions.minUpDownangle;
+        os << "pathstraightening=" << routeOptions.pathStraightening << ",tesselationdistance=" << routeOptions.tesselationDistance << ",zsensitivity=" << routeOptions.zSensitivity << ",min_turnangle=" << routeOptions.minTurnAngle << ",min_updownangle=" << routeOptions.minUpDownAngle;
         os << ")";
         return os;
     }
