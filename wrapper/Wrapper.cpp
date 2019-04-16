@@ -103,7 +103,9 @@ namespace carto { namespace sgre {
     }
 
     std::ostream& operator << (std::ostream& os, const Query& query) {
-        os << "Query(origin=" << query.getPos(0) << ", destination=" << query.getPos(1) << ")";
+        os << "Query(";
+        os << "origin=" << query.getPos(0) << ",destination=" << query.getPos(1);
+        os << ")";
         return os;
     }
 
@@ -114,7 +116,8 @@ namespace carto { namespace sgre {
                 os << "type=" << nameValue.first << ",";
             }
         }
-        os << "tag=" << instr.getTag().serialize() << ", distance=" << instr.getDistance() << ", time=" << instr.getTime() << ", geometryindex=" << instr.getGeometryIndex() << ")";
+        os << "tag=" << instr.getTag().serialize() << ",distance=" << instr.getDistance() << ",time=" << instr.getTime() << ",geometryindex=" << instr.getGeometryIndex();
+        os << ")";
         return os;
     }
 
@@ -134,12 +137,16 @@ namespace carto { namespace sgre {
                 os << "status=" << nameValue.first << ",";
             }
         }
-        os << "instructions=" << result.getInstructions() << ", geometry=" << result.getGeometry() << ", totaldistance=" << result.getTotalDistance() << ", totaltime=" << result.getTotalTime() << ")";
+        os << "instructions=" << result.getInstructions() << ",geometry=" << result.getGeometry() << ",totaldistance=" << result.getTotalDistance() << ",totaltime=" << result.getTotalTime();
+        os << ")";
         return os;
     }
 
     std::ostream& operator << (std::ostream& os, const RouteFinder& routeFinder) {
-        os << "RouteFinder(pathstraightening=" << routeFinder.getPathStraightening() << ", tesselationdistance=" << routeFinder.getTesselationDistance() << ", zsensitivity" << routeFinder.getZSensitivity() << ")";
+        os << "RouteFinder(";
+        const RouteFinder::RouteOptions& routeOptions = routeFinder.getRouteOptions();
+        os << "pathstraightening=" << routeOptions.pathStraightening << ",tesselationdistance=" << routeOptions.tesselationDistance << ",zsensitivity=" << routeOptions.zSensitivity << ",min_turnangle=" << routeOptions.minTurnAngle << ",min_updownangle=" << routeOptions.minUpDownangle;
+        os << ")";
         return os;
     }
 
@@ -203,9 +210,6 @@ BOOST_PYTHON_MODULE(sgre) {
 
     class_<carto::sgre::RouteFinder, std::shared_ptr<carto::sgre::RouteFinder>>("RouteFinder", no_init)
        .def(self_ns::str(self_ns::self))
-       .add_property("pathstraightening", &carto::sgre::RouteFinder::getPathStraightening, &carto::sgre::RouteFinder::setPathStraightening)
-       .add_property("tesselationdistance", &carto::sgre::RouteFinder::getTesselationDistance, &carto::sgre::RouteFinder::setTesselationDistance)
-       .add_property("zsensitivity", &carto::sgre::RouteFinder::getZSensitivity, &carto::sgre::RouteFinder::setZSensitivity)
        .def("find", &carto::sgre::RouteFinder::find);
 
     def("create_routefinder", &createRouteFinder);
