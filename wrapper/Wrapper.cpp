@@ -2,6 +2,8 @@
 #include <vector>
 #include <iostream>
 #include <initializer_list>
+#include <string>
+#include <codecvt>
 
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
@@ -45,6 +47,99 @@ namespace {
         return value;
     }
 
+    picojson::value py2picojson(const boost::python::object& obj) {
+        boost::python::extract<boost::python::dict> dictObj(obj);
+        if (dictObj.check()) {
+            boost::python::dict dict = dictObj;
+            boost::python::list keys = dict.keys();
+
+            picojson::object obj;
+            for (int i = 0; i < len(keys); i++) {
+                boost::python::extract<std::string> extractedKey(keys[i]);
+                if (!extractedKey.check()) {
+                    throw std::runtime_error("expecting string key");
+                }
+                std::string key = extractedKey;
+                picojson::value val = py2picojson(dict[key]);
+                obj[key] = val;
+            }
+            return picojson::value(obj);
+        }
+
+        boost::python::extract<boost::python::list> listObj(obj);
+        if (listObj.check()) {
+            boost::python::list list = listObj;
+
+            picojson::array arr;
+            for (int i = 0; i < len(list); i++) {
+                picojson::value val = py2picojson(list[i]);
+                arr.push_back(val);
+            }
+            return picojson::value(arr);
+        }
+
+        std::string className = boost::python::extract<std::string>(obj.attr("__class__").attr("__name__"));
+        if (className == "NoneType") {
+            return picojson::value();
+        }
+        if (className == "bool") {
+            bool val = boost::python::extract<bool>(obj);
+            return picojson::value(val);
+        }
+        if (className == "int" || className == "long") {
+            std::int64_t val = boost::python::extract<std::int64_t>(obj);
+            return picojson::value(val);
+        }
+        boost::python::extract<std::string> stringObj(obj);
+        if (stringObj.check()) {
+            std::string str = stringObj;
+            return picojson::value(str);
+        }
+        boost::python::extract<std::wstring> wstringObj(obj);
+        if (wstringObj.check()) {
+            std::wstring wstr = wstringObj;
+            return picojson::value(std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstr));
+        }
+        boost::python::extract<double> doubleObj(obj);
+        if (doubleObj.check()) {
+            double val = doubleObj;
+            return picojson::value(val);
+        }
+        throw std::runtime_error("failed to convert python object");
+    }
+
+    boost::python::object picojson2py(const picojson::value& val) {
+        if (val.is<picojson::object>()) {
+            boost::python::dict dict;
+            for (auto item : val.get<picojson::object>()) {
+                dict[item.first] = picojson2py(item.second);
+            }
+            return dict;
+        }
+
+        if (val.is<picojson::array>()) {
+            boost::python::list list;
+            for (auto item : val.get<picojson::array>()) {
+                list.append(picojson2py(item));
+            }
+            return list;
+        }
+
+        if (val.is<std::string>()) {
+            return boost::python::object(val.get<std::string>());
+        }
+        if (val.is<std::int64_t>()) {
+            return boost::python::object(val.get<std::int64_t>());
+        }
+        if (val.is<double>()) {
+            return boost::python::object(val.get<double>());
+        }
+        if (val.is<bool>()) {
+            return boost::python::object(val.get<bool>());
+        }
+        return boost::python::object();
+    }
+
     template <std::size_t N>
     double getPointComponent(const carto::sgre::Point& point) {
         return point(N);
@@ -58,6 +153,36 @@ namespace {
     template <std::size_t N>
     carto::sgre::Point getQueryPoint(const carto::sgre::Query& query) {
         return query.getPos(N);
+    }
+
+    template <std::size_t N>
+    void setQueryPoint(carto::sgre::Query& query, const carto::sgre::Point& pos) {
+        query.setPos(N, pos);
+    }
+
+    template <std::size_t N>
+    boost::python::dict getQueryFilter(const carto::sgre::Query& query) {
+        boost::python::dict dict;
+        for (auto item : query.getFilter(N)) {
+            dict[item.first] = picojson2py(item.second);
+        }
+        return dict;
+    }
+
+    template <std::size_t N>
+    void setQueryFilter(carto::sgre::Query& query, const boost::python::dict& dict) {
+        picojson::object filter;
+        boost::python::list keys = dict.keys();  
+        for (int i = 0; i < len(keys); i++) {  
+            boost::python::extract<std::string> extractedKey(keys[i]);  
+            if (!extractedKey.check()){  
+                throw std::runtime_error("expecting string key");
+            }  
+            std::string key = extractedKey;  
+            picojson::value val = py2picojson(dict[key]);
+            filter[key] = val;  
+        }  
+        query.setFilter(N, filter);
     }
 
     std::string getInstructionTag(const carto::sgre::Instruction& instr) {
@@ -104,7 +229,8 @@ namespace carto { namespace sgre {
 
     std::ostream& operator << (std::ostream& os, const Query& query) {
         os << "Query(";
-        os << "origin=" << query.getPos(0) << ",destination=" << query.getPos(1);
+        os << "origin=" << query.getPos(0) << ",destination=" << query.getPos(1) << ",";
+        os << "origin_filter=" << picojson::value(query.getFilter(0)).serialize() << ",destination_filter=" << picojson::value(query.getFilter(1)).serialize();
         os << ")";
         return os;
     }
@@ -163,7 +289,7 @@ namespace carto { namespace sgre {
 BOOST_PYTHON_MODULE(sgre) {
     using namespace boost::python;
 
-    class_<carto::sgre::Point>("Point", init<double, double, double>())
+    class_<carto::sgre::Point>("Point", init<double, double, double>((boost::python::arg("x"), boost::python::arg("y"), boost::python::arg("z")=0.0)))
        .def(self_ns::str(self_ns::self))
        .add_property("x", &getPointComponent<0>, &setPointComponent<0>)
        .add_property("y", &getPointComponent<1>, &setPointComponent<1>)
@@ -175,8 +301,10 @@ BOOST_PYTHON_MODULE(sgre) {
 
     class_<carto::sgre::Query>("Query", init<carto::sgre::Point, carto::sgre::Point>())
        .def(self_ns::str(self_ns::self))
-       .add_property("origin", &getQueryPoint<0>)
-       .add_property("destination", &getQueryPoint<1>);
+       .add_property("origin", &getQueryPoint<0>, &setQueryPoint<0>)
+       .add_property("destination", &getQueryPoint<1>, &setQueryPoint<1>)
+       .add_property("origin_filter", &getQueryFilter<0>, &setQueryFilter<0>)
+       .add_property("destination_filter", &getQueryFilter<1>, &setQueryFilter<1>);
 
     enum_<carto::sgre::Instruction::Type> instructionTypeEnum("InstructionType");
     for (const auto& nameValue : instructionTypeTable) {

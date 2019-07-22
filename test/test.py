@@ -16,6 +16,8 @@ router = sgre.create_routefinder(geojson, config, profile)
 origin = sgre.Point(-5.99632725596723, 37.3932610196257, 0)
 destination = sgre.Point(-5.99673452489332, 37.3932966870052, 12)
 query = sgre.Query(origin, destination)
+query.origin_filter = { 'type': 'hallway' }
+query.destination_filter = { 'type': 'hallway' }
 
 # Find the route
 result = router.find(query)
@@ -28,3 +30,4 @@ print('Total time: %g' % result.totaltime)
 print('Full result: %s' % result)
 print('Initial point: %s' % result.geometry[result.instructions[0].geometryindex])
 print('Final point: %s' % result.geometry[result.instructions[-1].geometryindex])
+print(router)
