@@ -1,14 +1,8 @@
 # SGRE module for Python
 
-## Compiling (Ubuntu 16.04)
+## Compiling (Ubuntu 18.04)
 
-Assuming the following packages are installed: **python, python-dev, cmake, make, gcc, g++, libboost-dev, libboost-python-dev**. By default the module is configured for Python 2.7.
-To use it with Python 3.x, make sure that these additional packages are installed: **python3, python3-dev**. Also, you need to update the following lines in *CMakeLists.txt*:
-
-```
-set(PYTHON_VERSION 3.5)
-set(BOOST_PYTHONLIB python-py35)
-```
+Assuming the following packages are installed: **python, python-dev, python3-dev, cmake, make, gcc, g++, libboost-dev, libboost-python-dev**. By default the module is configured for Python 3.
 
 Execute the following commands to build the Python module (in the directory of *CMakeLists.txt*):
 
@@ -29,7 +23,7 @@ export PYTHONPATH=$PYTHONPATH:`pwd`/build
 
 ## Testing
 
-Now verify that the module works by executing test script (use `python3` if using Python 3):
+Now verify that the module works by executing test script:
 
 ```
 cd test
