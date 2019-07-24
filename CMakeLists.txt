@@ -7,8 +7,8 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-set(PYTHON_VERSION 2.7)
-set(BOOST_PYTHONLIB python-py27)
+set(PYTHON_VERSION 3.5)
+set(BOOST_PYTHONLIB python-py35)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ftemplate-depth=1024")
 file(GLOB sgre_SRC_FILES "wrapper/*.cpp" "src/*.cpp" "libs/tess2/source/*.c")
