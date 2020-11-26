@@ -1,5 +1,6 @@
-# Make sure that sgre.so is reachable using PYTHONPATH env variable
+# IMPORTANT: Make sure that sgre.so is reachable using PYTHONPATH env variable
 import sgre
+import math
 
 # Read configuration as a string
 with open('config.json', 'rb') as f:
@@ -22,6 +23,9 @@ destination = sgre.Point(-5.99673452489332, 37.3932966870052, 12)
 query = sgre.Query(origin, destination)
 query.origin_filter = {'type': 'hallway'}
 query.destination_filter = {'type': 'hallway'}
+
+# Set parameters
+router.set_parameter('$delay', 3.0)
 
 # Find the route
 result = router.find(query)

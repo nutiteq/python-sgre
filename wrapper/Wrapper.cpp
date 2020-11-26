@@ -256,6 +256,16 @@ namespace carto { namespace sgre {
         return os;
     }
 
+    std::ostream& operator << (std::ostream& os, const std::map<std::string, float>& paramValues) {
+        os << "{";
+        std::size_t i = 0;
+        for (const auto& paramValue : paramValues) {
+            os << (i++ > 0 ? "," : "") << paramValue.first << "=" << paramValue.second;
+        }
+        os << "}";
+        return os;
+    }
+
     std::ostream& operator << (std::ostream& os, const Result& result) {
         os << "Result(";
         for (const auto& nameValue : resultStatusTable) {
@@ -271,7 +281,7 @@ namespace carto { namespace sgre {
     std::ostream& operator << (std::ostream& os, const RouteFinder& routeFinder) {
         os << "RouteFinder(";
         const RouteFinder::RouteOptions& routeOptions = routeFinder.getRouteOptions();
-        os << "pathstraightening=" << routeOptions.pathStraightening << ",tesselationdistance=" << routeOptions.tesselationDistance << ",zsensitivity=" << routeOptions.zSensitivity << ",min_turnangle=" << routeOptions.minTurnAngle << ",min_updownangle=" << routeOptions.minUpDownAngle;
+        os << "pathstraightening=" << routeOptions.pathStraightening << ",tesselationdistance=" << routeOptions.tesselationDistance << ",zsensitivity=" << routeOptions.zSensitivity << ",min_turnangle=" << routeOptions.minTurnAngle << ",min_updownangle=" << routeOptions.minUpDownAngle << ",parameters=" << routeFinder.getParameters();
         os << ")";
         return os;
     }
@@ -338,6 +348,8 @@ BOOST_PYTHON_MODULE(sgre) {
 
     class_<carto::sgre::RouteFinder, std::shared_ptr<carto::sgre::RouteFinder>>("RouteFinder", no_init)
        .def(self_ns::str(self_ns::self))
+       .def("get_parameter", &carto::sgre::RouteFinder::getParameter)
+       .def("set_parameter", &carto::sgre::RouteFinder::setParameter)
        .def("find", &carto::sgre::RouteFinder::find);
 
     def("create_routefinder", &createRouteFinder);
