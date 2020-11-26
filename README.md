@@ -40,5 +40,5 @@ Now verify that the module works by executing test script:
 
 ```
 cd test
-python test.py
+python3 test.py
 ```
