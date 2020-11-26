@@ -4,6 +4,19 @@
 
 Assuming the following packages are installed: **python, python-dev, python3-dev, cmake, make, gcc, g++, libboost-dev, libboost-python-dev**. By default the module is configured for Python 3.
 
+Check the version of the installed Python interpreter:
+
+```
+python3 --version
+```
+
+Modify *PYTHON_VERSION* and *BOOST_PYTHONLIB* variables in *CMakeLists.txt* to match the version of the installed Python interpreter. For example (for Python 3.6.x):
+
+```
+set(PYTHON_VERSION 3.6)
+set(BOOST_PYTHONLIB python-py36)
+```
+
 Execute the following commands to build the Python module (in the directory of *CMakeLists.txt*):
 
 ```
